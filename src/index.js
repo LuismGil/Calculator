@@ -2,200 +2,260 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './styles/styles.scss';
 
-const Calculator = () => {
-  return (
-    <div className="container">
-      <Buttons />
-    </div>
-  );
-};
-
-class Buttons extends React.Component {
+class Calculator extends React.Component {
   constructor() {
     super();
     this.state = {
-      currentValue: '0',
+      display: '0',
+      formula: '',
     };
-    this.handleAddDecimals = this.handleAddDecimals.bind(this);
+
+    this.handleNumberClick = this.handleNumberClick.bind(this);
+    this.handleSignClick = this.handleSignClick.bind(this);
     this.handleEvaluate = this.handleEvaluate.bind(this);
     this.handleClear = this.handleClear.bind(this);
   }
 
-  handleClick = value => {
-    const { currentValue } = this.state;
+  handleNumberClick = e => {
+    const { display, formula } = this.state;
+    const target = e.target.value;
+    const newValue = display === '0' ? '' + target : display + '' + target;
+    if (target === '.' && display.includes('.')) {
+      return;
+    }
     this.setState({
-      currentValue: currentValue === '0' ? String(value) : currentValue + value,
+      formula: formula + '' + target,
+      display: newValue,
     });
   };
 
-  handleAddDecimals = () => {
-    const { currentValue } = this.state;
-    if (currentValue.indexOf('.') === -1) {
-      this.setState({
-        currentValue: currentValue + '.',
-      });
+  removeOperator = () => {
+    let { formula } = this.state;
+    while ('/-*+'.includes(formula.slice(-1))) {
+      formula = formula.slice(0, -1);
     }
+    return formula;
+  };
+
+  handleSignClick = e => {
+    const { formula } = this.state;
+    const target = e.target.value;
+    let newFormula;
+    if (target === '-') {
+      newFormula = formula + '' + target;
+    } else {
+      newFormula = this.removeOperator() + '' + target;
+    }
+    this.setState({
+      formula: newFormula,
+      display: target,
+    });
   };
 
   handleEvaluate = () => {
-    const { currentValue } = this.state;
+    const { formula } = this.state;
+    const result = eval(formula);
+
     this.setState({
-      currentValue: eval(currentValue),
+      display: result,
+      formula: '' + result,
     });
   };
 
-  // handleEvaluate = () => {
-  //   const { currentValue } = this.state;
-  //   let fixedNum =
-  //     currentValue % 1 === 0
-  //       ? parseFloat(currentValue).toFixed(0)
-  //       : parseFloat(currentValue).toFixed(2);
-  //   this.setState({
-  //     currentValue: eval(fixedNum),
-  //   });
-  // };
-
   handleClear = () => {
     this.setState({
-      currentValue: '0',
+      display: '0',
+      formula: '',
     });
   };
 
   render() {
-    const { currentValue } = this.state;
-
+    const { display, formula } = this.state;
     return (
-      <div>
-        <input
-          className="container__display"
-          id="display"
-          value={currentValue}
-          type="text"
-        />
-        <div className="container__btn__spaces">
+      <>
+        <div className="container">
+          <Display display={display} formula={formula} />
+
+          <div className="container__btn__spaces">
+            <NumberKey
+              id="seven"
+              handleClick={this.handleNumberClick}
+              value={7}
+            />
+
+            <NumberKey
+              id="eight"
+              handleClick={this.handleNumberClick}
+              value={8}
+            />
+
+            <NumberKey
+              id="nine"
+              handleClick={this.handleNumberClick}
+              value={9}
+            />
+
+            <OperatorKey
+              id="add"
+              handleClick={this.handleSignClick}
+              value="+"
+            />
+
+            <NumberKey
+              id="four"
+              handleClick={this.handleNumberClick}
+              value={4}
+            />
+
+            <NumberKey
+              id="five"
+              handleClick={this.handleNumberClick}
+              value={5}
+            />
+
+            <NumberKey
+              id="six"
+              handleClick={this.handleNumberClick}
+              value={6}
+            />
+
+            <OperatorKey
+              id="subtract"
+              handleClick={this.handleSignClick}
+              value="-"
+            />
+
+            <NumberKey
+              id="one"
+              handleClick={this.handleNumberClick}
+              value={1}
+            />
+
+            <NumberKey
+              id="two"
+              handleClick={this.handleNumberClick}
+              value={2}
+            />
+
+            <NumberKey
+              id="three"
+              handleClick={this.handleNumberClick}
+              value={3}
+            />
+
+            <OperatorKey
+              id="divide"
+              handleClick={this.handleSignClick}
+              value="/"
+            />
+
+            <NumberKey
+              id="zero"
+              handleClick={this.handleNumberClick}
+              value={0}
+            />
+
+            <NumberKey
+              id="decimal"
+              handleClick={this.handleNumberClick}
+              value="."
+            />
+            <button
+              className="container__btn container__btn--clear"
+              id="clear"
+              onClick={this.handleClear}
+            >
+              C
+            </button>
+            <OperatorKey
+              id="multiply"
+              handleClick={this.handleSignClick}
+              value="*"
+            />
+          </div>
           <button
-            className="container__btn"
-            id="seven"
-            onClick={() => this.handleClick(7)}
+            className="container__btn container__btn--equal"
+            id="equals"
+            onClick={this.handleEvaluate}
           >
-            7
-          </button>
-          <button
-            className="container__btn"
-            id="eight"
-            onClick={() => this.handleClick(8)}
-          >
-            8
-          </button>
-          <button
-            className="container__btn"
-            id="nine"
-            onClick={() => this.handleClick(9)}
-          >
-            9
-          </button>
-          <button
-            className="container__btn container__btn--clear"
-            id="clear"
-            onClick={this.handleClear}
-          >
-            C
-          </button>
-          <button
-            className="container__btn"
-            id="four"
-            onClick={() => this.handleClick(4)}
-          >
-            4
-          </button>
-          <button
-            className="container__btn"
-            id="five"
-            onClick={() => this.handleClick(5)}
-          >
-            5
-          </button>
-          <button
-            className="container__btn"
-            id="six"
-            onClick={() => this.handleClick(6)}
-          >
-            6
-          </button>
-          <button
-            className="container__btn container__btn--operators "
-            id="add"
-            onClick={() => this.handleClick('+')}
-          >
-            +
-          </button>
-          <button
-            className="container__btn"
-            id="one"
-            onClick={() => this.handleClick(1)}
-          >
-            1
-          </button>
-          <button
-            className="container__btn"
-            id="two"
-            onClick={() => this.handleClick(2)}
-          >
-            2
-          </button>
-          <button
-            className="container__btn"
-            id="three"
-            onClick={() => this.handleClick(3)}
-          >
-            3
-          </button>
-          <button
-            className="container__btn container__btn--operators "
-            id="subtract"
-            onClick={() => this.handleClick('-')}
-          >
-            -
-          </button>
-          <button
-            className="container__btn"
-            id="zero"
-            onClick={() => this.handleClick(0)}
-          >
-            0
-          </button>
-          <button
-            className="container__btn"
-            id="decimal"
-            onClick={this.handleAddDecimals}
-          >
-            .
-          </button>
-          <button
-            className="container__btn container__btn--operators "
-            id="multiply"
-            onClick={() => this.handleClick('*')}
-          >
-            *
-          </button>
-          <button
-            className="container__btn container__btn--operators "
-            id="divide"
-            onClick={() => this.handleClick('/')}
-          >
-            /
+            =
           </button>
         </div>
-        <button
-          className="container__btn container__btn--equal"
-          id="equals"
-          onClick={this.handleEvaluate}
-        >
-          =
-        </button>
-      </div>
+        <Footer />
+      </>
     );
   }
 }
 
+const Display = props => {
+  const { display, formula } = props;
+  return (
+    <>
+      <div className="container__display">
+        <div className="container__display--outputs">{formula} </div>
+        <hr className="container__display--space" />
+        <div
+          className="container__display--outputs container__display--outputs--formula"
+          id="display"
+        >
+          {display}
+        </div>
+      </div>
+    </>
+  );
+};
+
+const OperatorKey = props => {
+  const { value, id, handleClick } = props;
+  return (
+    <button
+      className="container__btn container__btn--operators"
+      id={id}
+      value={value}
+      onClick={handleClick}
+    >
+      {value}
+    </button>
+  );
+};
+
+const NumberKey = props => {
+  const { value, id, handleClick } = props;
+  return (
+    <button
+      className="container__btn"
+      id={id}
+      value={value}
+      onClick={handleClick}
+    >
+      {value}
+    </button>
+  );
+};
+
+const Footer = () => {
+  return (
+    <div>
+      <div className="container__icons">
+        <a
+          className="container__icons__icon"
+          id="profile-link"
+          href="https://github.com/LuismGil"
+          target="_blank"
+        >
+          <i className="container__icons__icon--size fab fa-github-square"></i>
+        </a>
+
+        <a
+          className="container__icons__icon"
+          href="https://www.linkedin.com/in/giltorresluis/"
+          target="_blank"
+        >
+          <i className="container__icons__icon--size fab fa-linkedin"></i>
+        </a>
+      </div>
+      <footer className="container__footer">by Luis M Gil</footer>
+    </div>
+  );
+};
 ReactDOM.render(<Calculator />, document.getElementById('root'));

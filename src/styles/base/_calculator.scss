@@ -1,23 +1,69 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 .container {
-  background-color: $light-gray;
-  border-radius: 25px;
+  background-color: $dark-marine-blue;
+  border-radius: 5px;
   display: block;
-  height: 480px;
-  margin: 0 auto;
-  padding: 20px;
+  height: 430px;
+  margin: 20px auto;
+  padding: 20px 10px;
   width: 270px;
+
+  &__icons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    &__icon {
+      align-items: center;
+      display: flex;
+      outline: none;
+      flex-direction: column;
+      margin: 5px;
+      padding: 5px;
+      transition: transform 0.5s ease-out;
+
+      &--size {
+        font-size: 25px;
+        margin: 5px 0;
+        padding: 5px 0;
+      }
+
+      &:link {
+        color: $dark-marine-blue;
+        text-decoration: none;
+      }
+
+      &:hover {
+        color: lighten($dark-marine-blue, 45%);
+        transform: scale(1.2);
+      }
+
+      &:visited {
+        color: $blue;
+      }
+
+      &:active {
+        color: lighten($dark-marine-blue, 45%);
+      }
+    }
+  }
+
+  &__footer {
+    color: $dark-marine-blue;
+    text-align: center;
+    font-size: 18px;
+  }
 }
 
 .container__btn {
-  border-radius: 10px;
+  border-color: $light-gray;
+  border-radius: 2px;
   cursor: pointer;
   display: block;
   font-size: 25px;
   height: 65px;
   outline: none;
-  width: 65px;
 
   &:active {
     background-color: lighten($dark-marine-blue, 45%);
@@ -26,8 +72,8 @@
   &__spaces {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-gap: 3px;
-    margin: 10px auto 3px;
+    grid-gap: 0;
+    margin: 0 auto;
   }
 
   &--operators {
@@ -41,19 +87,35 @@
   &--equal {
     background-color: lighten($blue, 30%);
     display: block;
-    margin: 2px auto;
     width: 100%;
   }
 }
 
 .container__display {
+  align-items: flex-end;
   background-color: $white;
-  border-radius: 25px;
-  display: block;
-  font-size: 35px;
+  border-color: $light-gray;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  font-size: 30px;
   height: 100px;
-  margin-bottom: 40px;
-  outline: none;
-  text-align: center;
+  justify-content: center;
+  margin-bottom: 10px;
   width: 270px;
+
+  &--space {
+    border-style: groove;
+    display: block;
+    margin: 0;
+    width: 268px;
+  }
+
+  &--outputs {
+    margin: 1px 10px;
+  }
+
+  &--formula {
+    overflow: auto;
+  }
 }
