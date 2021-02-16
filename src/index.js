@@ -6,8 +6,10 @@ class Calculator extends React.Component {
   constructor() {
     super();
     this.state = {
+      currentVal: '0',
       display: '0',
       formula: '',
+      newDigit: false,
     };
 
     this.handleNumberClick = this.handleNumberClick.bind(this);
@@ -17,15 +19,17 @@ class Calculator extends React.Component {
   }
 
   handleNumberClick = e => {
-    const { display, formula } = this.state;
+    const { display, formula, newDigit } = this.state;
+
     const target = e.target.value;
     const newValue = display === '0' ? '' + target : display + '' + target;
     if (target === '.' && display.includes('.')) {
       return;
     }
     this.setState({
-      formula: formula + '' + target,
-      display: newValue,
+      formula: newDigit ? target : formula + '' + target,
+      display: newDigit ? target : newValue,
+      newDigit: false,
     });
   };
 
@@ -49,16 +53,18 @@ class Calculator extends React.Component {
     this.setState({
       formula: newFormula,
       display: target,
+      newDigit: false,
     });
   };
 
   handleEvaluate = () => {
-    const { formula } = this.state;
-    const result = eval(formula);
+    const { formula, newDigit } = this.state;
+    const result = Math.round(10000 * eval(formula)) / 10000;
 
     this.setState({
       display: result,
-      formula: '' + result,
+      formula: '' + result, //obs
+      newDigit: true,
     });
   };
 

@@ -69,10 +69,16 @@
     background-color: lighten($dark-marine-blue, 45%);
   }
 
+  &:hover {
+    color: lighten($dark-marine-blue, 45%);
+    outline: 1px solid $light-gray;
+    z-index: 3;
+  }
+
   &__spaces {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
     grid-gap: 0;
+    grid-template-columns: repeat(4, 1fr);
     margin: 0 auto;
   }
 
