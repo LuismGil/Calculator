@@ -6,7 +6,7 @@ class Calculator extends React.Component {
   constructor() {
     super();
     this.state = {
-      currentVal: '0',
+      prevValue: '0',
       display: '0',
       formula: '',
       newDigit: false,
@@ -16,7 +16,16 @@ class Calculator extends React.Component {
     this.handleSignClick = this.handleSignClick.bind(this);
     this.handleEvaluate = this.handleEvaluate.bind(this);
     this.handleClear = this.handleClear.bind(this);
+    this.maxLengthWarning = this.maxLengthWarning.bind(this);
   }
+
+  maxLengthWarning = () => {
+    this.setState({
+      display: 'Limit excedeed',
+      prevValue: '',
+    });
+    setTimeout(() => this.setState({ display: this.state.prevValue }), 1000);
+  };
 
   handleNumberClick = e => {
     const { display, formula, newDigit } = this.state;
@@ -26,11 +35,15 @@ class Calculator extends React.Component {
     if (target === '.' && display.includes('.')) {
       return;
     }
-    this.setState({
-      formula: newDigit ? target : formula + '' + target,
-      display: newDigit ? target : newValue,
-      newDigit: false,
-    });
+    if (display.length > 11) {
+      this.maxLengthWarning();
+    } else {
+      this.setState({
+        formula: newDigit ? target : formula + '' + target,
+        display: newDigit ? target : newValue,
+        newDigit: false,
+      });
+    }
   };
 
   removeOperator = () => {
@@ -59,11 +72,11 @@ class Calculator extends React.Component {
 
   handleEvaluate = () => {
     const { formula, newDigit } = this.state;
-    const result = Math.round(10000 * eval(formula)) / 10000;
+    const result = eval(formula);
 
     this.setState({
       display: result,
-      formula: '' + result, //obs
+      formula: '' + result,
       newDigit: true,
     });
   };
@@ -198,12 +211,9 @@ const Display = props => {
   return (
     <>
       <div className="container__display">
-        <div className="container__display--outputs">{formula} </div>
+        <div className="container__display--formula">{formula} </div>
         <hr className="container__display--space" />
-        <div
-          className="container__display--outputs container__display--outputs--formula"
-          id="display"
-        >
+        <div className="container__display--display" id="display">
           {display}
         </div>
       </div>
