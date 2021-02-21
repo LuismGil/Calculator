@@ -10,6 +10,7 @@ class Calculator extends React.Component {
       result: '0',
       currentValue: '',
       formula: '0',
+      extraNum: false,
     };
 
     this.handleNumberPress = this.handleNumberPress.bind(this);
@@ -20,7 +21,7 @@ class Calculator extends React.Component {
   }
 
   handleNumberPress = num => {
-    const { display, formula, currentValue } = this.state;
+    const { display, formula, currentValue, extraNum } = this.state;
     let numTarget = num.target.value;
     let currentDisplay = display;
     let currentFormula = formula;
@@ -29,11 +30,15 @@ class Calculator extends React.Component {
       ? this.setState({
           display: numTarget,
         })
-      : this.setState({ display: currentDisplay + numTarget });
+      : this.setState({
+          display: extraNum ? numTarget : currentDisplay + numTarget,
+        });
 
     currentFormula === '0'
       ? this.setState({ formula: numTarget })
-      : this.setState({ formula: currentFormula + numTarget });
+      : this.setState({
+          formula: extraNum ? numTarget : currentFormula + numTarget,
+        });
 
     currentFormula === '0'
       ? (currentFormula = numTarget)
@@ -41,7 +46,8 @@ class Calculator extends React.Component {
 
     this.setState({
       currentValue: currentValue + numTarget,
-      result: eval(currentFormula),
+      result: extraNum ? numTarget : eval(currentFormula),
+      extraNum: false,
     });
   };
 
@@ -49,8 +55,8 @@ class Calculator extends React.Component {
     const { display, formula } = this.state;
     let currentDisplay = display;
     let currentFormula = formula;
-    let isLastOperator = ['x', '/', '-', '+', '%'].includes(display.slice(-1));
-    let isSecondLastOperator = ['x', '/', '-', '+', '%'].includes(
+    let isLastOperator = ['x', '/', '-', '+'].includes(display.slice(-1));
+    let isSecondLastOperator = ['x', '/', '-', '+'].includes(
       display.slice(currentDisplay.length - 2, currentDisplay.length - 1)
     );
 
@@ -105,6 +111,7 @@ class Calculator extends React.Component {
     this.setState({
       result: eval(currentFormula),
       currentValue: '0',
+      extraNum: false,
     });
   };
 
@@ -115,6 +122,7 @@ class Calculator extends React.Component {
       formula: result.toString(),
       currentValue: result.toString(),
       result: result.toString(),
+      extraNum: true,
     });
   };
 
