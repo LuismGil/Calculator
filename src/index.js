@@ -3,202 +3,155 @@ import ReactDOM from 'react-dom';
 import './styles/styles.scss';
 
 class Calculator extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
-      prevValue: '0',
       display: '0',
-      formula: '',
-      newDigit: false,
+      result: '0',
+      currentValue: '',
+      formula: '0',
     };
 
-    this.handleNumberClick = this.handleNumberClick.bind(this);
-    this.handleSignClick = this.handleSignClick.bind(this);
+    this.handleNumberPress = this.handleNumberPress.bind(this);
+    this.handleOperation = this.handleOperation.bind(this);
     this.handleEvaluate = this.handleEvaluate.bind(this);
     this.handleClear = this.handleClear.bind(this);
-    this.maxLengthWarning = this.maxLengthWarning.bind(this);
+    this.handleDecimalPress = this.handleDecimalPress.bind(this);
   }
 
-  maxLengthWarning = () => {
+  handleNumberPress = num => {
+    const { display, formula, currentValue } = this.state;
+    let numTarget = num.target.value;
+    let currentDisplay = display;
+    let currentFormula = formula;
+
+    currentDisplay === '0'
+      ? this.setState({
+          display: numTarget,
+        })
+      : this.setState({ display: currentDisplay + numTarget });
+
+    currentFormula === '0'
+      ? this.setState({ formula: numTarget })
+      : this.setState({ formula: currentFormula + numTarget });
+
+    currentFormula === '0'
+      ? (currentFormula = numTarget)
+      : (currentFormula = currentFormula + numTarget);
+
     this.setState({
-      display: 'Limit excedeed',
-      prevValue: '',
+      currentValue: currentValue + numTarget,
+      result: eval(currentFormula),
     });
-    setTimeout(() => this.setState({ display: this.state.prevValue }), 1000);
   };
 
-  handleNumberClick = e => {
-    const { display, formula, newDigit } = this.state;
+  handleOperation = op => {
+    const { display, formula } = this.state;
+    let currentDisplay = display;
+    let currentFormula = formula;
+    let isLastOperator = ['x', '/', '-', '+', '%'].includes(display.slice(-1));
+    let isSecondLastOperator = ['x', '/', '-', '+', '%'].includes(
+      display.slice(currentDisplay.length - 2, currentDisplay.length - 1)
+    );
 
-    const target = e.target.value;
-    const newValue = display === '0' ? '' + target : display + '' + target;
-    if (target === '.' && display.includes('.')) {
-      return;
+    if (isLastOperator) {
+      if (isSecondLastOperator) {
+        currentDisplay = currentDisplay.slice(0, currentDisplay.length - 2);
+        currentFormula = currentFormula.slice(0, currentFormula.length - 2);
+      } else {
+        currentDisplay = currentDisplay.slice(0, currentDisplay.length - 1);
+        currentFormula = currentFormula.slice(0, currentFormula.length - 1);
+      }
     }
-    if (display.length > 11) {
-      this.maxLengthWarning();
-    } else {
-      this.setState({
-        formula: newDigit ? target : formula + '' + target,
-        display: newDigit ? target : newValue,
-        newDigit: false,
-      });
-    }
-  };
 
-  removeOperator = () => {
-    let { formula } = this.state;
-    while ('/-*+'.includes(formula.slice(-1))) {
-      formula = formula.slice(0, -1);
-    }
-    return formula;
-  };
+    switch (op.target.value) {
+      case 'multiply':
+        this.setState({
+          display: currentDisplay + 'x',
+          formula: currentFormula + '*',
+        });
+        break;
 
-  handleSignClick = e => {
-    const { formula } = this.state;
-    const target = e.target.value;
-    let newFormula;
-    if (target === '-') {
-      newFormula = formula + '' + target;
-    } else {
-      newFormula = this.removeOperator() + '' + target;
+      case 'divide':
+        this.setState({
+          display: currentDisplay + '/',
+          formula: currentFormula + '/',
+        });
+        break;
+
+      case 'add':
+        this.setState({
+          display: currentDisplay + '+',
+          formula: currentFormula + '+',
+        });
+        break;
+
+      case 'subtract':
+        // eslint-disable-next-line no-unused-expressions
+        '-'.includes(display.slice(-1))
+          ? false
+          : this.setState({
+              display: display + '-',
+              formula: formula + '-',
+            });
+        break;
+
+      default:
+        this.setState({
+          display: 'ERROR!',
+        });
     }
+
     this.setState({
-      formula: newFormula,
-      display: target,
-      newDigit: false,
+      result: eval(currentFormula),
+      currentValue: '0',
     });
   };
 
   handleEvaluate = () => {
-    const { formula, newDigit } = this.state;
-    const result = eval(formula);
-
+    const { result } = this.state;
     this.setState({
-      display: result,
-      formula: '' + result,
-      newDigit: true,
+      display: result.toString(),
+      formula: result.toString(),
+      currentValue: result.toString(),
+      result: result.toString(),
     });
   };
 
   handleClear = () => {
     this.setState({
       display: '0',
-      formula: '',
+      result: '0',
+      currentValue: '',
+      formula: '0',
     });
   };
 
+  handleDecimalPress = () => {
+    const { display, formula, currentValue } = this.state;
+    // eslint-disable-next-line no-unused-expressions
+    this.state.currentValue.includes('.')
+      ? false
+      : this.setState({
+          display: display + '.',
+          formula: formula + '.',
+          currentValue: currentValue + '.',
+        });
+  };
+
   render() {
-    const { display, formula } = this.state;
+    const { display, result } = this.state;
     return (
       <>
         <div className="container">
-          <Display display={display} formula={formula} />
-
-          <div className="container__btn__spaces">
-            <NumberKey
-              id="seven"
-              handleClick={this.handleNumberClick}
-              value={7}
-            />
-
-            <NumberKey
-              id="eight"
-              handleClick={this.handleNumberClick}
-              value={8}
-            />
-
-            <NumberKey
-              id="nine"
-              handleClick={this.handleNumberClick}
-              value={9}
-            />
-
-            <OperatorKey
-              id="add"
-              handleClick={this.handleSignClick}
-              value="+"
-            />
-
-            <NumberKey
-              id="four"
-              handleClick={this.handleNumberClick}
-              value={4}
-            />
-
-            <NumberKey
-              id="five"
-              handleClick={this.handleNumberClick}
-              value={5}
-            />
-
-            <NumberKey
-              id="six"
-              handleClick={this.handleNumberClick}
-              value={6}
-            />
-
-            <OperatorKey
-              id="subtract"
-              handleClick={this.handleSignClick}
-              value="-"
-            />
-
-            <NumberKey
-              id="one"
-              handleClick={this.handleNumberClick}
-              value={1}
-            />
-
-            <NumberKey
-              id="two"
-              handleClick={this.handleNumberClick}
-              value={2}
-            />
-
-            <NumberKey
-              id="three"
-              handleClick={this.handleNumberClick}
-              value={3}
-            />
-
-            <OperatorKey
-              id="divide"
-              handleClick={this.handleSignClick}
-              value="/"
-            />
-
-            <NumberKey
-              id="zero"
-              handleClick={this.handleNumberClick}
-              value={0}
-            />
-
-            <NumberKey
-              id="decimal"
-              handleClick={this.handleNumberClick}
-              value="."
-            />
-            <button
-              className="container__btn container__btn--clear"
-              id="clear"
-              onClick={this.handleClear}
-            >
-              C
-            </button>
-            <OperatorKey
-              id="multiply"
-              handleClick={this.handleSignClick}
-              value="*"
-            />
-          </div>
-          <button
-            className="container__btn container__btn--equal"
-            id="equals"
-            onClick={this.handleEvaluate}
-          >
-            =
-          </button>
+          <Display display={display} result={result} />
+          <Buttons
+            handleNumberPress={this.handleNumberPress}
+            handleClear={this.handleClear}
+            handleOperation={this.handleOperation}
+            handleEvaluate={this.handleEvaluate}
+            handleDecimalPress={this.handleDecimalPress}
+          />
         </div>
         <Footer />
       </>
@@ -206,46 +159,184 @@ class Calculator extends React.Component {
   }
 }
 
-const Display = props => {
-  const { display, formula } = props;
+const Buttons = props => {
+  const {
+    handleNumberPress,
+    handleClear,
+    handleOperation,
+    handleDecimalPress,
+    handleEvaluate,
+  } = props;
+
   return (
     <>
-      <div className="container__display">
-        <div className="container__display--formula">{formula} </div>
-        <hr className="container__display--space" />
-        <div className="container__display--display" id="display">
-          {display}
-        </div>
+      <hr />
+      <div className="container__btn__spaces">
+        <button
+          className="container__btn"
+          id="seven"
+          onClick={handleNumberPress}
+          value="7"
+        >
+          7
+        </button>
+
+        <button
+          className="container__btn"
+          id="eight"
+          onClick={handleNumberPress}
+          value="8"
+        >
+          8
+        </button>
+
+        <button
+          className="container__btn"
+          id="nine"
+          onClick={handleNumberPress}
+          value="9"
+        >
+          9
+        </button>
+
+        <button
+          className="container__btn container__btn--operators"
+          id="add"
+          onClick={handleOperation}
+          value="add"
+        >
+          +
+        </button>
+
+        <button
+          className="container__btn"
+          id="four"
+          onClick={handleNumberPress}
+          value="4"
+        >
+          4
+        </button>
+
+        <button
+          className="container__btn"
+          id="five"
+          onClick={handleNumberPress}
+          value="5"
+        >
+          5
+        </button>
+
+        <button
+          className="container__btn"
+          id="six"
+          onClick={handleNumberPress}
+          value="6"
+        >
+          6
+        </button>
+
+        <button
+          className="container__btn container__btn--operators"
+          id="subtract"
+          onClick={handleOperation}
+          value="subtract"
+        >
+          -
+        </button>
+
+        <button
+          className="container__btn"
+          id="one"
+          onClick={handleNumberPress}
+          value="1"
+        >
+          1
+        </button>
+
+        <button
+          className="container__btn"
+          id="two"
+          onClick={handleNumberPress}
+          value="2"
+        >
+          2
+        </button>
+
+        <button
+          className="container__btn"
+          id="three"
+          onClick={handleNumberPress}
+          value="3"
+        >
+          3
+        </button>
+
+        <button
+          className="container__btn container__btn--operators"
+          id="divide"
+          onClick={handleOperation}
+          value="divide"
+        >
+          /
+        </button>
+
+        <button
+          className="container__btn"
+          id="zero"
+          onClick={handleNumberPress}
+          value="0"
+        >
+          0
+        </button>
+
+        <button
+          className="container__btn"
+          id="decimal"
+          onClick={handleDecimalPress}
+        >
+          .
+        </button>
+
+        <button
+          className="container__btn container__btn--clear"
+          id="clear"
+          onClick={handleClear}
+        >
+          C
+        </button>
+
+        <button
+          className="container__btn container__btn--operators"
+          id="multiply"
+          onClick={handleOperation}
+          value="multiply"
+        >
+          X
+        </button>
       </div>
+
+      <button
+        className="container__btn container__btn--equal"
+        id="equals"
+        onClick={handleEvaluate}
+      >
+        =
+      </button>
     </>
   );
 };
 
-const OperatorKey = props => {
-  const { value, id, handleClick } = props;
+const Display = props => {
+  const { display, result } = props;
   return (
-    <button
-      className="container__btn container__btn--operators"
-      id={id}
-      value={value}
-      onClick={handleClick}
-    >
-      {value}
-    </button>
-  );
-};
-
-const NumberKey = props => {
-  const { value, id, handleClick } = props;
-  return (
-    <button
-      className="container__btn"
-      id={id}
-      value={value}
-      onClick={handleClick}
-    >
-      {value}
-    </button>
+    <div className="container__display">
+      <div id="display" className="container__display--display">
+        {display}
+      </div>
+      <div id="result" className="container__display--result">
+        {result}
+      </div>
+    </div>
   );
 };
 
@@ -258,6 +349,7 @@ const Footer = () => {
           id="profile-link"
           href="https://github.com/LuismGil"
           target="_blank"
+          rel="noreferrer"
         >
           <i className="container__icons__icon--size fab fa-github-square"></i>
         </a>
@@ -266,6 +358,7 @@ const Footer = () => {
           className="container__icons__icon"
           href="https://www.linkedin.com/in/giltorresluis/"
           target="_blank"
+          rel="noreferrer"
         >
           <i className="container__icons__icon--size fab fa-linkedin"></i>
         </a>
